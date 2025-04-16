@@ -1,0 +1,40 @@
+<!-- templates/torneio/administrar.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Administrar Batalha</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow-md">
+        <h2 class="text-2xl font-bold text-center mb-4">Administrar Batalha</h2>
+        <form method="POST" class="grid grid-cols-2 gap-6">
+            {% csrf_token %}
+            <div>
+                <h3 class="text-lg font-semibold mb-2">{{ batalha.startup_1.nome }}</h3>
+                <select name="evento_startup_1" class="w-full border px-3 py-2 rounded">
+                    <option value="">Selecione um evento</option>
+                    <option value="pitch">Pitch convincente (+6)</option>
+                    <option value="produto_bugs">Produto com bugs (−4)</option>
+                    <!-- Adicione os demais eventos -->
+                </select>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold mb-2">{{ batalha.startup_2.nome }}</h3>
+                <select name="evento_startup_2" class="w-full border px-3 py-2 rounded">
+                    <option value="">Selecione um evento</option>
+                    <option value="pitch">Pitch convincente (+6)</option>
+                    <option value="produto_bugs">Produto com bugs (−4)</option>
+                    <!-- Adicione os demais eventos -->
+                </select>
+            </div>
+            <div class="col-span-2 mt-4 text-center">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-semibold">
+                    Salvar Batalha
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

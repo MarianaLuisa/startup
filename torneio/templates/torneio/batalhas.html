@@ -1,0 +1,27 @@
+<!-- templates/torneio/batalhas.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Batalhas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-3xl mx-auto bg-white shadow-md rounded p-6">
+        <h1 class="text-2xl font-bold text-center mb-6">Batalhas Pendentes</h1>
+        <ul class="space-y-4">
+            {% for batalha in batalhas %}
+                <li class="flex justify-between items-center bg-gray-50 p-4 border rounded shadow-sm">
+                    <div>
+                        <span class="font-semibold">{{ batalha.startup_1.nome }}</span> vs
+                        <span class="font-semibold">{{ batalha.startup_2.nome }}</span>
+                    </div>
+                    <a href="{% url 'administrar_batalha' batalha.id %}" class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700">
+                        Administrar
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

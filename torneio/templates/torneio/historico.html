@@ -1,0 +1,44 @@
+<!-- templates/torneio/historico.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Histórico de Batalhas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-5xl mx-auto bg-white p-6 rounded shadow">
+        <h1 class="text-2xl font-bold text-center mb-6">Histórico de Batalhas</h1>
+        <table class="w-full table-auto">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="px-4 py-2">Startup 1</th>
+                    <th class="px-4 py-2">Startup 2</th>
+                    <th class="px-4 py-2">Pontuação 1</th>
+                    <th class="px-4 py-2">Pontuação 2</th>
+                    <th class="px-4 py-2">Vencedor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for batalha in batalhas %}
+                <tr class="border-b">
+                    <td class="px-4 py-2">{{ batalha.startup_1.nome }}</td>
+                    <td class="px-4 py-2">{{ batalha.startup_2.nome }}</td>
+                    <td class="px-4 py-2">{{ batalha.startup_1.pontos }}</td>
+                    <td class="px-4 py-2">{{ batalha.startup_2.pontos }}</td>
+                    <td class="px-4 py-2">
+                        {% if batalha.startup_1.pontos > batalha.startup_2.pontos %}
+                            {{ batalha.startup_1.nome }}
+                        {% elif batalha.startup_2.pontos > batalha.startup_1.pontos %}
+                            {{ batalha.startup_2.nome }}
+                        {% else %}
+                            Empate
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

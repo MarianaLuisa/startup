@@ -1,0 +1,35 @@
+<!-- templates/torneio/cadastro.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Startups</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-xl mx-auto bg-white rounded-xl shadow-md p-6">
+        <h1 class="text-2xl font-bold text-center mb-6">Cadastrar Startup</h1>
+        {% if erro %}
+            <div class="bg-red-100 text-red-800 p-3 mb-4 rounded">{{ erro }}</div>
+        {% endif %}
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block font-semibold">Nome:</label>
+                <input type="text" name="nome" class="w-full border border-gray-300 rounded px-3 py-2">
+            </div>
+            <div>
+                <label class="block font-semibold">Slogan:</label>
+                <input type="text" name="slogan" class="w-full border border-gray-300 rounded px-3 py-2">
+            </div>
+            <div>
+                <label class="block font-semibold">Ano de Fundação:</label>
+                <input type="number" name="ano_fundacao" class="w-full border border-gray-300 rounded px-3 py-2">
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded">
+                Cadastrar
+            </button>
+        </form>
+    </div>
+</body>
+</html>
