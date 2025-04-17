@@ -1,44 +1,71 @@
-<!-- templates/torneio/historico.html -->
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Histórico de Batalhas</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-5xl mx-auto bg-white p-6 rounded shadow">
-        <h1 class="text-2xl font-bold text-center mb-6">Histórico de Batalhas</h1>
-        <table class="w-full table-auto">
-            <thead class="bg-gray-200">
-                <tr>
-                    <th class="px-4 py-2">Startup 1</th>
-                    <th class="px-4 py-2">Startup 2</th>
-                    <th class="px-4 py-2">Pontuação 1</th>
-                    <th class="px-4 py-2">Pontuação 2</th>
-                    <th class="px-4 py-2">Vencedor</th>
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-r from-green-400 to-blue-500 p-6 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-3xl">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">📜 Histórico de Batalhas</h1>
+
+        <div class="mb-4">
+            <p class="text-xl font-semibold text-gray-700">Startup: <span class="text-2xl text-purple-600">{{ startup.nome }}</span></p>
+            <p class="text-lg text-gray-600 italic">Slogan: "{{ startup.slogan }}"</p>
+        </div>
+
+        {% if batalhas %}
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
+            <thead>
+                <tr class="bg-purple-100 text-gray-600">
+                    <th class="py-3 px-4 text-left">Rodada</th>
+                    <th class="py-3 px-4 text-left">Adversário</th>
+                    <th class="py-3 px-4 text-left">Pontuação Inicial</th>
+                    <th class="py-3 px-4 text-left">Eventos</th>
+                    <th class="py-3 px-4 text-left">Resultado</th>
                 </tr>
             </thead>
             <tbody>
                 {% for batalha in batalhas %}
-                <tr class="border-b">
-                    <td class="px-4 py-2">{{ batalha.startup_1.nome }}</td>
-                    <td class="px-4 py-2">{{ batalha.startup_2.nome }}</td>
-                    <td class="px-4 py-2">{{ batalha.startup_1.pontos }}</td>
-                    <td class="px-4 py-2">{{ batalha.startup_2.pontos }}</td>
-                    <td class="px-4 py-2">
-                        {% if batalha.startup_1.pontos > batalha.startup_2.pontos %}
-                            {{ batalha.startup_1.nome }}
-                        {% elif batalha.startup_2.pontos > batalha.startup_1.pontos %}
+                <tr class="border-b border-gray-200">
+                    <td class="py-3 px-4">{{ forloop.counter }}</td>
+                    <td class="py-3 px-4">
+                        {% if batalha.startup_1 == startup %}
                             {{ batalha.startup_2.nome }}
                         {% else %}
-                            Empate
+                            {{ batalha.startup_1.nome }}
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-4">{{ batalha.startup_1.pontos if batalha.startup_1 == startup else batalha.startup_2.pontos }}</td>
+                    <td class="py-3 px-4">
+                        <ul class="space-y-1">
+                            {% if batalha.startup_1 == startup %}
+                                {% for evento in batalha.startup_1.eventos.all %}
+                                    <li class="text-sm text-gray-500">{{ evento.nome }}: {{ evento.pontos }} pontos</li>
+                                {% endfor %}
+                            {% else %}
+                                {% for evento in batalha.startup_2.eventos.all %}
+                                    <li class="text-sm text-gray-500">{{ evento.nome }}: {{ evento.pontos }} pontos</li>
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        {% if batalha.startup_1.pontos > batalha.startup_2.pontos %}
+                            <span class="text-green-600 font-semibold">Vencedor</span>
+                        {% elif batalha.startup_1.pontos < batalha.startup_2.pontos %}
+                            <span class="text-red-600 font-semibold">Perdedor</span>
+                        {% else %}
+                            <span class="text-yellow-600 font-semibold">Empate</span>
                         {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <p class="text-gray-500">Ainda não houve batalhas para essa startup.</p>
+        {% endif %}
+
+        <a href="{% url 'ranking' %}" class="mt-6 inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-xl transition duration-200">
+            Voltar ao Ranking
+        </a>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

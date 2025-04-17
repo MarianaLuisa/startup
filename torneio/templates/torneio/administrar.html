@@ -1,40 +1,60 @@
-<!-- templates/torneio/administrar.html -->
+{% load custom_filters %}
+{% load static %}
+
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Administrar Batalha</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <title>Administrar Batalha</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow-md">
-        <h2 class="text-2xl font-bold text-center mb-4">Administrar Batalha</h2>
-        <form method="POST" class="grid grid-cols-2 gap-6">
-            {% csrf_token %}
-            <div>
-                <h3 class="text-lg font-semibold mb-2">{{ batalha.startup_1.nome }}</h3>
-                <select name="evento_startup_1" class="w-full border px-3 py-2 rounded">
-                    <option value="">Selecione um evento</option>
-                    <option value="pitch">Pitch convincente (+6)</option>
-                    <option value="produto_bugs">Produto com bugs (−4)</option>
-                    <!-- Adicione os demais eventos -->
-                </select>
-            </div>
-            <div>
-                <h3 class="text-lg font-semibold mb-2">{{ batalha.startup_2.nome }}</h3>
-                <select name="evento_startup_2" class="w-full border px-3 py-2 rounded">
-                    <option value="">Selecione um evento</option>
-                    <option value="pitch">Pitch convincente (+6)</option>
-                    <option value="produto_bugs">Produto com bugs (−4)</option>
-                    <!-- Adicione os demais eventos -->
-                </select>
-            </div>
-            <div class="col-span-2 mt-4 text-center">
-                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-semibold">
-                    Salvar Batalha
-                </button>
-            </div>
-        </form>
+<body class="bg-gray-100 py-10 px-4">
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8 space-y-6">
+
+    <h2 class="text-3xl font-bold text-center text-purple-600">Administração da Batalha</h2>
+
+    <form method="POST" class="space-y-6">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- STARTUP 1 -->
+        <div class="border p-4 rounded-xl bg-purple-50 shadow">
+          <h3 class="text-xl font-semibold text-purple-700 mb-2">{{ batalha.startup_1.nome }}</h3>
+          <p class="text-sm text-gray-600 mb-3">Pontuação atual: <strong>{{ batalha.startup_1.pontos }}</strong></p>
+
+          {% for key, valor in eventos.items %}
+            <label class="flex items-center space-x-2 mb-2">
+              <input type="checkbox" name="eventos_startup_1" value="{{ key }}" class="form-checkbox text-purple-600">
+                <span class="text-sm text-gray-700 capitalize">{{ key|replace_underscore }} ({{ valor }})</span>
+            </label>
+          {% endfor %}
+        </div>
+
+        <!-- STARTUP 2 -->
+        <div class="border p-4 rounded-xl bg-indigo-50 shadow">
+          <h3 class="text-xl font-semibold text-indigo-700 mb-2">{{ batalha.startup_2.nome }}</h3>
+          <p class="text-sm text-gray-600 mb-3">Pontuação atual: <strong>{{ batalha.startup_2.pontos }}</strong></p>
+
+          {% for key, valor in eventos.items %}
+            <label class="flex items-center space-x-2 mb-2">
+              <input type="checkbox" name="eventos_startup_2" value="{{ key }}" class="form-checkbox text-indigo-600">
+                <span class="text-sm text-gray-700 capitalize">{{ key|replace_underscore }} ({{ valor }})</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-lg shadow transition">
+          Finalizar Batalha
+        </button>
+      </div>
+    </form>
+
+    <div class="text-center">
+      <a href="{% url 'batalhas' %}" class="text-gray-600 hover:underline">Voltar para Batalhas</a>
     </div>
+  </div>
 </body>
 </html>

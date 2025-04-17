@@ -1,34 +1,79 @@
-<!-- templates/torneio/ranking.html -->
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Ranking Geral</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <title>Ranking do Torneio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md">
-        <h1 class="text-2xl font-bold text-center mb-6">Ranking das Startups</h1>
-        <table class="w-full border-collapse">
-            <thead>
-                <tr class="bg-blue-600 text-white">
-                    <th class="py-2 px-4">Posição</th>
-                    <th class="py-2 px-4">Nome</th>
-                    <th class="py-2 px-4">Pontuação</th>
-                    <th class="py-2 px-4">Slogan</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for startup in startups %}
-                <tr class="border-b hover:bg-gray-100">
-                    <td class="py-2 px-4">{{ forloop.counter }}</td>
-                    <td class="py-2 px-4 font-semibold">{{ startup.nome }}</td>
-                    <td class="py-2 px-4">{{ startup.pontuacao }}</td>
-                    <td class="py-2 px-4 italic text-gray-600">{{ startup.slogan }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<body class="bg-gray-100 text-gray-800 min-h-screen py-10 px-4">
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8 space-y-6">
+    <h2 class="text-2xl font-bold text-center text-blue-600">Ranking Final do Torneio</h2>
+
+    <!-- Mensagem de erro ou sucesso -->
+    {% if erro %}
+      <div class="bg-red-100 text-red-700 p-3 rounded-lg border border-red-300">{{ erro }}</div>
+    {% endif %}
+
+    {% if sucesso %}
+      <div class="bg-green-100 text-green-700 p-3 rounded-lg border border-green-300">{{ sucesso }}</div>
+    {% endif %}
+
+    <!-- Exibição de Ranking -->
+    {% if ranking_disponivel %}
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">Startups por Pontuação</h3>
+      <table class="w-full table-auto">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="px-4 py-2 text-left">#</th>
+            <th class="px-4 py-2 text-left">Nome</th>
+            <th class="px-4 py-2 text-left">Pontos</th>
+            <th class="px-4 py-2 text-left">Pitchs</th>
+            <th class="px-4 py-2 text-left">Bugs</th>
+            <th class="px-4 py-2 text-left">Trações</th>
+            <th class="px-4 py-2 text-left">Investidores Irritados</th>
+            <th class="px-4 py-2 text-left">Penalidades</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for startup in startups %}
+            <tr class="border-b">
+              <td class="px-4 py-2">{{ forloop.counter }}</td>
+              <td class="px-4 py-2">{{ startup.nome }}</td>
+              <td class="px-4 py-2">{{ startup.pontos }}</td>
+              <td class="px-4 py-2">{{ startup.pitch }}</td>
+              <td class="px-4 py-2">{{ startup.bugs }}</td>
+              <td class="px-4 py-2">{{ startup.tracoes }}</td>
+              <td class="px-4 py-2">{{ startup.investidores_irritados }}</td>
+              <td class="px-4 py-2">{{ startup.penalidades }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- Formulário de Exportação -->
+      {% if torneio_finalizado %}
+        <form method="get" action="{% url 'exportar_dados' %}">
+          <label for="formato" class="sr-only">Escolha o formato de exportação</label>
+          <select name="formato" id="formato" class="p-2 border rounded-lg">
+            <option value="csv">CSV</option>
+            <option value="json">JSON</option>
+          </select>
+          <button type="submit" class="bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-xl text-center transition duration-200">
+            Exportar Dados
+          </button>
+        </form>
+      {% else %}
+        <p class="text-red-500">A exportação só estará disponível após o fim do torneio.</p>
+      {% endif %}
+    {% else %}
+      <p class="text-red-500">O torneio ainda não foi iniciado. Nenhum ranking disponível.</p>
+    {% endif %}
+    <div class="text-center mt-8">
+        <a href="{% url 'index' %}" class="text-gray-600 hover:underline">Voltar ao início</a>
     </div>
+
+  </div>
 </body>
 </html>

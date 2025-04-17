@@ -1,0 +1,26 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Startup Rush - Exportar CSV</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex items-center justify-center p-6">
+  <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-8 space-y-6">
+    <h1 class="text-3xl font-bold text-center text-blue-600">Exportar CSV</h1>
+
+    {% if startups %}
+      <div class="text-center">
+        <a href="{% url 'exportar_csv' %}" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-xl transition duration-200 mt-4">Baixar CSV</a>
+      </div>
+    {% else %}
+      <div class="text-center">
+        <p class="text-lg text-gray-600">Nenhum dado disponível para exportação.</p>
+        <a href="{% url 'index' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl text-center transition duration-200 mt-4">Voltar ao Início</a>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
