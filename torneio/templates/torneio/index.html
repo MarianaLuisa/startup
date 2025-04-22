@@ -19,6 +19,41 @@
       <div class="bg-green-100 text-green-700 p-3 rounded-lg border border-green-300">{{ sucesso }}</div>
     {% endif %}
 
+      <div class="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-xl shadow-sm text-sm">
+      <p><strong>Bem-vindo ao <span class="text-blue-600 font-semibold">Startup Rush</span>!</strong></p>
+          <p class="text-gray-700 text-sm leading-relaxed">
+      <strong>Startup Rush</strong> é um sistema que simula um torneio eliminatório entre startups com ideias inovadoras.
+      O usuário atua como jurado e responsável por administrar o andamento das batalhas, registrando eventos que afetam diretamente a pontuação das competidoras.
+      O torneio segue até que reste apenas uma Startup vencedora, coroada como campeã do desafio.
+    </p>
+
+    </div>
+        <div class="bg-white border border-gray-200 text-gray-800 p-4 rounded-xl shadow-sm text-sm">
+      <h2 class="text-lg font-semibold text-gray-700 mb-2">Regras do Torneio</h2>
+      <ul class="list-disc list-inside space-y-1">
+        <li>Participam entre <strong>4 e 8 startups</strong>, obrigatoriamente em número par.</li>
+        <li>Cada startup inicia com <strong>70 pontos</strong>.</li>
+        <li>As rodadas são compostas por <strong>batalhas em pares</strong>, sorteadas automaticamente.</li>
+        <li>A startup vencedora de cada batalha recebe <strong>+30 pontos</strong> adicionais.</li>
+        <li>O usuário conduz o torneio escolhendo e administrando cada batalha.</li>
+      </ul>
+
+      <h3 class="text-md font-semibold text-gray-700 mt-4 mb-1">Eventos possíveis durante uma batalha</h3>
+      <ul class="list-disc list-inside space-y-1">
+        <li><strong>Pitch convincente:</strong> +6 pontos</li>
+        <li><strong>Produto com bugs:</strong> -4 pontos</li>
+        <li><strong>Boa tração de usuários:</strong> +3 pontos</li>
+        <li><strong>Investidor irritado:</strong> -6 pontos</li>
+        <li><strong>Fake news no pitch:</strong> -8 pontos</li>
+      </ul>
+
+        <h3 class="text-md font-semibold text-gray-700 mt-4 mb-1">Empates e Shark Fight:</h3>
+            <ul class="list-disc list-inside space-y-1">
+          <p>Em caso de <strong>empate</strong> ao final de uma batalha, o sistema executa automaticamente uma <em>Shark Fight</em>: uma rodada relâmpago onde uma das startups recebe aleatoriamente <strong>+2 pontos</strong>, determinando a startup vencedora da disputa.</p>
+            </ul>
+
+    </div>
+
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
       <a href="{% if torneio_finalizado %}
