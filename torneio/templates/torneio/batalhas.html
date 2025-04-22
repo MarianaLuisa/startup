@@ -1,3 +1,88 @@
+{#{% load static %}#}
+{##}
+{#<!DOCTYPE html>#}
+{#<html lang="pt-br">#}
+{#<head>#}
+{#  <meta charset="UTF-8">#}
+{#  <title>Batalhas - Startup Rush</title>#}
+{#  <script src="https://cdn.tailwindcss.com"></script>#}
+{#</head>#}
+{#<body class="bg-gray-100 min-h-screen py-10 px-4">#}
+{#  <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl p-8 space-y-6">#}
+{#    <h2 class="text-3xl font-bold text-center text-purple-600">Batalhas do Torneio</h2>#}
+{##}
+{#    {% if batalhas %}#}
+{#      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">#}
+{#        {% for batalha in batalhas %}#}
+{#          <div class="bg-gray-50 border rounded-xl p-5 shadow-sm space-y-3">#}
+{#            <div class="text-lg font-semibold text-gray-700 flex justify-between">#}
+{#              <span>{{ batalha.startup_1.nome }}</span>#}
+{#              <span class="text-gray-400">vs</span>#}
+{#              <span>{{ batalha.startup_2.nome }}</span>#}
+{#            </div>#}
+{##}
+{#            <div class="flex justify-between items-center">#}
+{#              <div class="text-sm text-gray-600">#}
+{#                {% if batalha.concluida %}#}
+{#                  <span class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">Concluída</span>#}
+{#                {% else %}#}
+{#                  <span class="inline-block px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">Pendente</span>#}
+{#                {% endif %}#}
+{#              </div>#}
+{##}
+{#              {% if not batalha.concluida %}#}
+{#                <a href="{% url 'administrar_batalha' batalha.id %}" class="bg-purple-500 hover:bg-purple-600 text-white text-sm px-4 py-2 rounded-lg transition">Administrar</a>#}
+{#              {% else %}#}
+{#                <button class="text-sm text-gray-400 cursor-not-allowed px-4 py-2 border rounded-lg" disabled>Finalizada</button>#}
+{#              {% endif %}#}
+{#            </div>#}
+{##}
+{#            {% if batalha.concluida %}#}
+{#              <div class="mt-4 text-sm text-gray-700 space-y-1">#}
+{##}
+{#                <!-- Eventos para Startup 1 -->#}
+{#                <h4 class="font-semibold text-gray-800 mt-4">Eventos {{ batalha.startup_1.nome }}:</h4>#}
+{#                <ul class="list-inside list-disc text-sm text-gray-700">#}
+{#                  {% for evento in batalha.eventos_startup_1 %}#}
+{#                    <li>{{ evento|capfirst }}</li>#}
+{#                  {% endfor %}#}
+{#                </ul>#}
+{##}
+{#                <!-- Eventos para Startup 2 -->#}
+{#                <h4 class="font-semibold text-gray-800 mt-4">Eventos {{ batalha.startup_2.nome }}:</h4>#}
+{#                <ul class="list-inside list-disc text-sm text-gray-700">#}
+{#                  {% for evento in batalha.eventos_startup_2 %}#}
+{#                    <li>{{ evento|capfirst }}</li>#}
+{#                  {% endfor %}#}
+{#                </ul>#}
+{##}
+{#                {% if batalha.empate %}#}
+{#                  {% if batalha.shark_fight %}#}
+{#                    <p class="text-yellow-600">Desempate via <strong>Shark Fight</strong></p>#}
+{#                  {% endif %}#}
+{#                {% endif %}#}
+{#              {% if batalha.vencedor %}#}
+{#                <p class="text-green-700 font-bold mt-2">Vencedora: {{ batalha.vencedor.nome }}</p>#}
+{#              {% endif %}#}
+{##}
+{#              </div>#}
+{#            {% endif %}#}
+{##}
+{#          </div>#}
+{#        {% endfor %}#}
+{#      </div>#}
+{#    {% else %}#}
+{#      <p class="text-center text-gray-500">Nenhuma batalha disponível ainda.</p>#}
+{#    {% endif %}#}
+{##}
+{#    <div class="text-center mt-8">#}
+{#        <a href="{% url 'index' %}" class="text-gray-600 hover:underline">Voltar ao início</a>#}
+{#    </div>#}
+{#  </div>#}
+{#</body>#}
+{#</html>#}
+
+
 {% load static %}
 
 <!DOCTYPE html>
@@ -36,6 +121,32 @@
                 <button class="text-sm text-gray-400 cursor-not-allowed px-4 py-2 border rounded-lg" disabled>Finalizada</button>
               {% endif %}
             </div>
+
+            {% if batalha.concluida %}
+              <div class="mt-4 text-sm text-gray-700 space-y-1">
+                <h4 class="font-semibold text-gray-800 mt-4">Eventos {{ batalha.startup_1.nome }}:</h4>
+                <ul class="list-inside list-disc text-sm text-gray-700">
+                  {% for evento in batalha.eventos_startup_1 %}
+                    <li>{{ evento|capfirst }}</li>
+                  {% endfor %}
+                </ul>
+
+                <h4 class="font-semibold text-gray-800 mt-4">Eventos {{ batalha.startup_2.nome }}:</h4>
+                <ul class="list-inside list-disc text-sm text-gray-700">
+                  {% for evento in batalha.eventos_startup_2 %}
+                    <li>{{ evento|capfirst }}</li>
+                  {% endfor %}
+                </ul>
+
+                {% if batalha.shark_fight %}
+                  <p class="text-yellow-600">Desempate via <strong>Shark Fight</strong></p>
+                {% endif %}
+
+                {% if batalha.vencedor %}
+                  <p class="text-green-700 font-bold mt-2">Vencedora: {{ batalha.vencedor.nome }}</p>
+                {% endif %}
+              </div>
+            {% endif %}
           </div>
         {% endfor %}
       </div>

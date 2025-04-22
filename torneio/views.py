@@ -1,9 +1,7 @@
 from django.shortcuts import render
 
-# Create your views here.
 from django.shortcuts import render, redirect
 from django.urls import reverse
-
 from .models import Startup, Batalha, Torneio
 import random
 import csv
@@ -12,11 +10,13 @@ from django.http import HttpResponse, JsonResponse
 from .models import Startup
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib import messages
+
 
 def torneio_em_andamento():
     return Batalha.objects.exists() and Batalha.objects.filter(concluida=False).exists()
 
-# 1. Página Inicial
 def index(request):
     startups = Startup.objects.all()
     pode_iniciar = 4 <= startups.count() <= 8 and startups.count() % 2 == 0
@@ -26,6 +26,7 @@ def index(request):
     torneio_em_andamento = torneio.em_andamento if torneio else False
     torneio_finalizado = torneio.finalizado if torneio else False
 
+
     return render(request, 'torneio/index.html', {
         'pode_iniciar': pode_iniciar,
         'erro': erro,
@@ -33,8 +34,6 @@ def index(request):
         'torneio_em_andamento': torneio_em_andamento,
         'torneio_finalizado': torneio_finalizado,
     })
-
-
 
 def cadastro(request):
     if torneio_em_andamento():
@@ -67,6 +66,11 @@ def cadastro(request):
         'sucesso': sucesso,
     })
 
+    torneio = Torneio.objects.last()
+    if torneio and torneio.finalizado:
+        return redirect(f"{reverse('index')}?erro=O torneio foi finalizado. Reinicie o sistema para cadastrar novas startups.")
+
+
 def deletar_startup(request, id):
     if torneio_em_andamento():
         return redirect('cadastro')  # ou mostrar mensagem de erro
@@ -74,7 +78,6 @@ def deletar_startup(request, id):
     startup.delete()
     return redirect('cadastro')
 
-# View para Ranking Geral
 
 def ranking(request):
     torneio_iniciado = Batalha.objects.exists()
@@ -113,10 +116,15 @@ def iniciar_torneio(request):
 
     return redirect('batalhas')
 
+    torneio = Torneio.objects.last()
+    if torneio and torneio.finalizado:
+        return redirect(f"{reverse('index')}?erro=O torneio já foi finalizado. Reinicie o sistema para iniciar um novo.")
+
 
 def batalhas(request):
     batalhas = Batalha.objects.all().order_by('id')
     return render(request, 'torneio/batalhas.html', {'batalhas': batalhas})
+
 
 def avancar_fase_ou_finalizar():
     if Batalha.objects.filter(concluida=False).exists():
@@ -160,7 +168,6 @@ def avancar_fase_ou_finalizar():
         torneio.save()
         return redirect('campea')
 
-
 def administrar_batalha(request, batalha_id):
     batalha = get_object_or_404(Batalha, id=batalha_id)
     startup1 = batalha.startup_1
@@ -174,80 +181,77 @@ def administrar_batalha(request, batalha_id):
         'fake_news': -8
     }
 
+    contexto = {
+        'batalha': batalha,
+        'eventos': eventos,
+    }
+
     if request.method == 'POST':
         evento1 = request.POST.getlist('eventos_startup_1')
         evento2 = request.POST.getlist('eventos_startup_2')
 
-        pontuacao1 = 0
-        pontuacao2 = 0
+        def processa_eventos(startup, eventos_lista):
+            pontos = 0
+            eventos_ocorridos = []
+            for ev in eventos_lista:
+                pontos += eventos.get(ev, 0)
+                eventos_ocorridos.append(ev)
+                if ev == 'bugs':
+                    startup.bugs += 1
+                elif ev == 'fake_news':
+                    startup.fake_news += 1
+                elif ev == 'tracoes':
+                    startup.tracoes += 1
+                elif ev == 'investidor_irritado':
+                    startup.investidores_irritados += 1
+            return pontos, eventos_ocorridos
 
-        # Registro dos eventos e cálculo da pontuação para startup 1
-        for ev in evento1:
-            pontuacao1 += eventos.get(ev, 0)
-            if ev == 'bugs':
-                startup1.bugs += 1
-            elif ev == 'fake_news':
-                startup1.fake_news += 1
-            elif ev == 'tracoes':
-                startup1.tracoes += 1
-            elif ev == 'investidor_irritado':
-                startup1.investidores_irritados += 1
-
-        # Registro dos eventos e cálculo da pontuação para startup 2
-        for ev in evento2:
-            pontuacao2 += eventos.get(ev, 0)
-            if ev == 'bugs':
-                startup2.bugs += 1
-            elif ev == 'fake_news':
-                startup2.fake_news += 1
-            elif ev == 'tracoes':
-                startup2.tracoes += 1
-            elif ev == 'investidor_irritado':
-                startup2.investidores_irritados += 1
+        pontuacao1, eventos_startup_1 = processa_eventos(startup1, evento1)
+        pontuacao2, eventos_startup_2 = processa_eventos(startup2, evento2)
 
         startup1.pontos += pontuacao1
         startup2.pontos += pontuacao2
 
-        # Empate = Shark Fight
-        if startup1.pontos == startup2.pontos:
-            if random.choice([True, False]):
-                startup1.pontos += 2
-            else:
-                startup2.pontos += 2
+        empate = pontuacao1 == pontuacao2
+        shark_fight = False
 
-        vencedor = startup1 if startup1.pontos > startup2.pontos else startup2
+        if empate:
+            shark_fight = True
+            bonus = 2
+            if random.choice([True, False]):
+                pontuacao1 += bonus
+                startup1.pontos += bonus
+            else:
+                pontuacao2 += bonus
+                startup2.pontos += bonus
+
+        vencedor = startup1 if pontuacao1 > pontuacao2 else startup2
         vencedor.pontos += 30
 
         startup1.save()
         startup2.save()
 
-        # Marcar a batalha como concluída
         batalha.concluida = True
+        batalha.vencedor = vencedor
+        batalha.eventos_startup_1 = eventos_startup_1
+        batalha.eventos_startup_2 = eventos_startup_2
+        batalha.shark_fight = shark_fight
         batalha.save()
 
         proxima_acao = avancar_fase_ou_finalizar()
 
-        if proxima_acao:
-            return proxima_acao
+        return proxima_acao or redirect('batalhas')
 
-        # Caso ainda haja batalhas para administrar, não redirecionar
-        return redirect('batalhas')  # Continua redirecionando para batalhas se a rodada não terminou
-
-    return render(request, 'torneio/administrar.html', {
-        'batalha': batalha,
-        'eventos': eventos
-    })
+    return render(request, 'torneio/administrar.html', contexto)
 
 def campea(request):
     campea = Startup.objects.order_by('-pontos').first()
     return render(request, 'torneio/campea.html', {'campea': campea})
 
-
 def historico(request, start_id):
     startup = Startup.objects.get(id=start_id)
     batalhas = Batalha.objects.filter(startup_1=startup) | Batalha.objects.filter(startup_2=startup)
     return render(request, 'torneio/historico.html', {'startup': startup, 'batalhas': batalhas})
-
 
 def reiniciar_sistema(request):
     Startup.objects.all().delete()
@@ -256,60 +260,48 @@ def reiniciar_sistema(request):
     return redirect(f"{reverse('index')}?sucesso=Sistema reiniciado com sucesso.")
 
 def exportar_dados(request):
-    # Verifica se o torneio foi finalizado
     if Batalha.objects.filter(concluida=False).exists():
-        return redirect('/?erro=O torneio ainda não foi finalizado. Não é possível exportar os dados.')
+        messages.error(request, "O torneio ainda não foi finalizado. Não é possível exportar os dados.")
+        return redirect('index')
 
-    # Obtém os dados das startups
     startups = Startup.objects.all().order_by('-pontos')
-
-    # Checa o parâmetro de formato no URL
     formato = request.GET.get('formato', '')
 
     if formato == 'json':
-        # Gera o arquivo JSON
         dados = []
-        for startup in startups:
+        for s in startups:
             dados.append({
-                'Nome': startup.nome,
-                'Slogan': startup.slogan,
-                'Ano de Fundação': startup.ano_fundacao,
-                'Pontos': startup.pontos,
-                'Pitchs': startup.pitchs,
-                'Bugs': startup.bugs,
-                'Trações': startup.tracoes,
-                'Investidores Irritados': startup.investidores_irritados,
-                'Penalidades': startup.penalidades
+                'Nome': s.nome,
+                'Slogan': s.slogan,
+                'Ano de Fundação': s.ano_fundacao,
+                'Pontos': s.pontos,
+                'Pitchs': s.pitchs,
+                'Bugs': s.bugs,
+                'Trações': s.tracoes,
+                'Investidores Irritados': s.investidores_irritados,
+                'Penalidades': s.penalidades
             })
 
-        # Resetando os dados do torneio
-        Batalha.objects.all().delete()
-        Startup.objects.update(pontos=0, pitchs=0, bugs=0, tracoes=0, investidores_irritados=0, penalidades=0)
-
-        return JsonResponse(dados, safe=False)
+        response = HttpResponse(
+            json.dumps(dados, cls=DjangoJSONEncoder, ensure_ascii=False, indent=4),
+            content_type='application/json'
+        )
+        response['Content-Disposition'] = 'attachment; filename="resultados_torneio.json"'
+        return response
 
     elif formato == 'csv':
-        # Gera o arquivo CSV
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="resultados_torneio.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(
-            ['Nome', 'Slogan', 'Ano de Fundação', 'Pontos', 'pitchs', 'Bugs', 'Trações', 'Investidores Irritados',
-             'Penalidades'])
+        writer.writerow(['Nome', 'Slogan', 'Ano de Fundação', 'Pontos', 'Pitchs', 'Bugs', 'Trações', 'Investidores Irritados', 'Penalidades'])
 
-        for startup in startups:
-            writer.writerow(
-                [startup.nome, startup.slogan, startup.ano_fundacao, startup.pontos, startup.pitchs, startup.bugs,
-                 startup.tracoes, startup.investidores_irritados, startup.penalidades])
-
-        # Resetando os dados do torneio
-        Batalha.objects.all().delete()
-        Startup.objects.update(pontos=0, pitchs=0, bugs=0, tracoes=0, investidores_irritados=0, penalidades=0)
+        for s in startups:
+            writer.writerow([s.nome, s.slogan, s.ano_fundacao, s.pontos, s.pitchs, s.bugs, s.tracoes, s.investidores_irritados, s.penalidades])
 
         return response
-    else:
-        # Se o formato não for especificado ou for inválido
-        return redirect('/?erro=Formato de exportação inválido.')
 
+    else:
+        messages.error(request, "Formato de exportação inválido.")
+        return redirect('index')
 

@@ -1,0 +1,37 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Batalhas - Startup Rush</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 px-4">
+  <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl p-8 space-y-6">
+    <div class="p-6 bg-white shadow-md rounded">
+      <h1 class="text-2xl font-bold mb-4">Resultado da Batalha</h1>
+
+      {% if empate %}
+        <p class="text-red-600 font-semibold mb-4">Houve um Empate! 🥶</p>
+      {% endif %}
+
+      {% if shark_fight %}
+        <p class="text-yellow-600 font-semibold mt-4">Shark Fight Ativado! 🦈</p>
+        <p class="mt-2 text-gray-500">O desempate foi decidido automaticamente com +2 pontos aleatórios.</p>
+      {% endif %}
+
+      <div class="mt-6">
+        <p><strong>{{ startup1.nome }}</strong>: {{ pontuacao1 }} pontos</p>
+        <p><strong>{{ startup2.nome }}</strong>: {{ pontuacao2 }} pontos</p>
+
+        <p class="text-green-700 font-bold mt-4">🏆 Vencedora: {{ vencedor }} (+30 pontos)</p>
+
+        <a href="{% url 'batalhas' %}" class="mt-6 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          Avançar para próximas batalhas
+        </a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,4 +1,6 @@
 from django.db import models
+import jsonfield
+
 
 # Create your models here.
 
@@ -27,6 +29,9 @@ class Batalha(models.Model):
     vencedor = models.ForeignKey(Startup, related_name='batalhas_vencidas', null=True, on_delete=models.SET_NULL)
     concluida = models.BooleanField(default=False)  # Adiciona o campo concluída
 
+    eventos_startup_1 = jsonfield.JSONField(null=True, blank=True)
+    eventos_startup_2 = jsonfield.JSONField(null=True, blank=True)
+    shark_fight = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.startup_1.nome} vs {self.startup_2.nome}'

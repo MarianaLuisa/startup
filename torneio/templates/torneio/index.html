@@ -20,11 +20,23 @@
     {% endif %}
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <a href="{% url 'cadastro' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl text-center transition duration-200">Cadastrar Startups</a>
 
-      <a href="{% url 'batalhas' %}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-xl text-center transition duration-200">Ver Batalhas</a>
+      <a href="{% if torneio_finalizado %}
+                   ?erro=O torneio já foi finalizado. Reinicie para cadastrar novas startups.
+                {% else %}
+                   {% url 'cadastro' %}
+                {% endif %}"
+         class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl text-center transition duration-200">
+         Cadastrar Startups
+      </a>
 
-      <a href="{% url 'ranking' %}" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-xl text-center transition duration-200">Ver Ranking Geral</a>
+      <a href="{% url 'batalhas' %}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-xl text-center transition duration-200">
+        Ver Batalhas
+      </a>
+
+      <a href="{% url 'ranking' %}" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-xl text-center transition duration-200">
+        Ver Ranking Geral
+      </a>
 
       {% if em_andamento %}
         <form method="get" action="{% url 'exportar_dados' %}">
@@ -32,37 +44,33 @@
             Exportar Dados
           </button>
         </form>
-      {% else %}
-        <p class="text-red-500">A exportação só estará disponível após o fim do torneio.</p>
       {% endif %}
 
-      <form method="post" action="{% url 'iniciar_torneio' %}">
-        {% csrf_token %}
-        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl text-center transition duration-200 w-full sm:w-auto">
-          Iniciar Torneio
-        </button>
-      </form>
-    {% if sucesso %}
-      <div class="bg-green-100 text-green-800 p-2 rounded mb-4">{{ sucesso }}</div>
-    {% endif %}
-    {% if erro %}
-      <div class="bg-red-100 text-red-800 p-2 rounded mb-4">{{ erro }}</div>
-    {% endif %}
+      <a href="{% if torneio_finalizado %}
+                   ?erro=O torneio já foi finalizado. Reinicie para iniciar um novo.
+                {% elif not pode_iniciar %}
+                   ?erro=É necessário ter 4 ou 8 startups cadastradas para iniciar o torneio.
+                {% else %}
+                   {% url 'iniciar_torneio' %}
+                {% endif %}"
+         class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl text-center transition duration-200">
+         Iniciar Torneio
+      </a>
 
-    {% if torneio_finalizado %}
-      <form action="{% url 'reiniciar_sistema' %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded">
-          Reiniciar Sistema
-        </button>
-      </form>
-    {% endif %}
+      {% if torneio_finalizado %}
+        <form action="{% url 'reiniciar_sistema' %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded">
+            Reiniciar Sistema
+          </button>
+        </form>
+      {% endif %}
 
-        {% if not torneio_em_andamento and startups %}
+      {% if not torneio_em_andamento and startups %}
         <a href="{% url 'reiniciar_sistema' %}" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4 inline-block">
-            Reiniciar sistema
+          Reiniciar sistema
         </a>
-        {% endif %}
+      {% endif %}
 
     </div>
   </div>
