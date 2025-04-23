@@ -7,8 +7,6 @@ class Startup(models.Model):
     slogan = models.CharField(max_length=255)
     ano_fundacao = models.IntegerField()
     pontos = models.IntegerField(default=70)
-
-    # Adicione os campos de estatísticas de eventos
     pitchs = models.IntegerField(default=0)
     bugs = models.IntegerField(default=0)
     tracoes = models.IntegerField(default=0)
@@ -30,6 +28,7 @@ class Batalha(models.Model):
     eventos_startup_1 = models.JSONField(null=True, blank=True)
     eventos_startup_2 = models.JSONField(null=True, blank=True)
     shark_fight = models.BooleanField(default=False)
+    fase = models.IntegerField(default=1)
 
     def __str__(self):
         return f'{self.startup_1.nome} vs {self.startup_2.nome}'

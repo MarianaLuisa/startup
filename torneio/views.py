@@ -79,6 +79,23 @@ def deletar_startup(request, id):
     return redirect('cadastro')
 
 
+# def ranking(request):
+#     torneio_iniciado = Batalha.objects.exists()
+#     torneio_finalizado = not Batalha.objects.filter(concluida=False).exists()
+#
+#     if not torneio_iniciado:
+#         return render(request, 'torneio/ranking.html', {
+#             'ranking_disponivel': False
+#         })
+#
+#     startups = Startup.objects.all().order_by('-pontos')
+#
+#     return render(request, 'torneio/ranking.html', {
+#         'ranking_disponivel': True,
+#         'torneio_finalizado': torneio_finalizado,
+#         'startups': startups
+#     })
+
 def ranking(request):
     torneio_iniciado = Batalha.objects.exists()
     torneio_finalizado = not Batalha.objects.filter(concluida=False).exists()
@@ -128,45 +145,119 @@ def batalhas(request):
 
 def avancar_fase_ou_finalizar():
     if Batalha.objects.filter(concluida=False).exists():
-        return None  # Ainda há batalhas em andamento
+        return None  # Espera todas as batalhas da rodada atual finalizarem
 
     torneio = Torneio.objects.filter(em_andamento=True).last()
-    startups_vivas = Startup.objects.filter(
-        Q(id__in=Batalha.objects.values_list('startup_1', flat=True)) |
-        Q(id__in=Batalha.objects.values_list('startup_2', flat=True))
-    ).order_by('-pontos')
+    if not torneio:
+        return None
 
-    startups_vivas = list(startups_vivas[:len(startups_vivas) // 2])
-    if len(startups_vivas) % 2 != 0:
-        startups_vivas.pop()
+    # Recuperar as batalhas mais recentes, ou seja, a rodada que acabou agora
+    batalhas_recentes = []
+    startups_vistas = set()
 
-    if len(startups_vivas) == 2:
-        final_existente = Batalha.objects.filter(
-            Q(startup_1=startups_vivas[0], startup_2=startups_vivas[1]) |
-            Q(startup_1=startups_vivas[1], startup_2=startups_vivas[0]),
-            concluida=True
-        ).exists()
+    for b in Batalha.objects.filter(concluida=True).order_by('-id'):
+        ids = {b.startup_1_id, b.startup_2_id}
+        if not ids.isdisjoint(startups_vistas):
+            break  # Achou batalha de rodada anterior
+        batalhas_recentes.append(b)
+        startups_vistas.update(ids)
 
-        if final_existente:
-            torneio.em_andamento = False
-            torneio.finalizado = True
-            torneio.save()
-            return redirect('campea')
-        else:
-            Batalha.objects.create(startup_1=startups_vivas[0], startup_2=startups_vivas[1])
-            return redirect('batalhas')
-
-    elif len(startups_vivas) >= 2:
-        random.shuffle(startups_vivas)
-        for i in range(0, len(startups_vivas), 2):
-            Batalha.objects.create(startup_1=startups_vivas[i], startup_2=startups_vivas[i + 1])
-        return redirect('batalhas')
-
-    else:
+    # Pegamos os vencedores da rodada que acabou de terminar
+    vencedores_ids = [b.vencedor_id for b in batalhas_recentes]
+    if len(set(vencedores_ids)) == 1:
+        # Só restou uma startup
         torneio.em_andamento = False
         torneio.finalizado = True
         torneio.save()
         return redirect('campea')
+
+    # Criar a próxima rodada
+    startups_vivas = list(Startup.objects.filter(id__in=vencedores_ids))
+    random.shuffle(startups_vivas)
+
+    for i in range(0, len(startups_vivas), 2):
+        Batalha.objects.create(
+            startup_1=startups_vivas[i],
+            startup_2=startups_vivas[i + 1]
+        )
+
+    return redirect('batalhas')
+
+# def administrar_batalha(request, batalha_id):
+#     batalha = get_object_or_404(Batalha, id=batalha_id)
+#     startup1 = batalha.startup_1
+#     startup2 = batalha.startup_2
+#
+#     eventos = {
+#         'pitch': 6,
+#         'bugs': -4,
+#         'tracoes': 3,
+#         'investidor_irritado': -6,
+#         'fake_news': -8
+#     }
+#
+#     contexto = {
+#         'batalha': batalha,
+#         'eventos': eventos,
+#     }
+#
+#     if request.method == 'POST':
+#         evento1 = request.POST.getlist('eventos_startup_1')
+#         evento2 = request.POST.getlist('eventos_startup_2')
+#
+#         def processa_eventos(startup, eventos_lista):
+#             pontos = 0
+#             eventos_ocorridos = []
+#             for ev in eventos_lista:
+#                 pontos += eventos.get(ev, 0)
+#                 eventos_ocorridos.append(ev)
+#                 if ev == 'bugs':
+#                     startup.bugs += 1
+#                 elif ev == 'fake_news':
+#                     startup.fake_news += 1
+#                 elif ev == 'tracoes':
+#                     startup.tracoes += 1
+#                 elif ev == 'investidor_irritado':
+#                     startup.investidores_irritados += 1
+#             return pontos, eventos_ocorridos
+#
+#         pontuacao1, eventos_startup_1 = processa_eventos(startup1, evento1)
+#         pontuacao2, eventos_startup_2 = processa_eventos(startup2, evento2)
+#
+#         startup1.pontos += pontuacao1
+#         startup2.pontos += pontuacao2
+#
+#         empate = pontuacao1 == pontuacao2
+#         shark_fight = False
+#
+#         if empate:
+#             shark_fight = True
+#             bonus = 2
+#             if random.choice([True, False]):
+#                 pontuacao1 += bonus
+#                 startup1.pontos += bonus
+#             else:
+#                 pontuacao2 += bonus
+#                 startup2.pontos += bonus
+#
+#         vencedor = startup1 if pontuacao1 > pontuacao2 else startup2
+#         vencedor.pontos += 30
+#
+#         startup1.save()
+#         startup2.save()
+#
+#         batalha.concluida = True
+#         batalha.vencedor = vencedor
+#         batalha.eventos_startup_1 = eventos_startup_1
+#         batalha.eventos_startup_2 = eventos_startup_2
+#         batalha.shark_fight = shark_fight
+#         batalha.save()
+#
+#         proxima_acao = avancar_fase_ou_finalizar()
+#
+#         return proxima_acao or redirect('batalhas')
+#
+#     return render(request, 'torneio/administrar.html', contexto)
 
 def administrar_batalha(request, batalha_id):
     batalha = get_object_or_404(Batalha, id=batalha_id)
@@ -204,6 +295,8 @@ def administrar_batalha(request, batalha_id):
                     startup.tracoes += 1
                 elif ev == 'investidor_irritado':
                     startup.investidores_irritados += 1
+                elif ev == 'pitch':
+                    startup.pitchs += 1
             return pontos, eventos_ocorridos
 
         pontuacao1, eventos_startup_1 = processa_eventos(startup1, evento1)
@@ -228,6 +321,7 @@ def administrar_batalha(request, batalha_id):
         vencedor = startup1 if pontuacao1 > pontuacao2 else startup2
         vencedor.pontos += 30
 
+        # Salva as mudanças de eventos e pontuação
         startup1.save()
         startup2.save()
 
@@ -243,6 +337,7 @@ def administrar_batalha(request, batalha_id):
         return proxima_acao or redirect('batalhas')
 
     return render(request, 'torneio/administrar.html', contexto)
+
 
 def campea(request):
     campea = Startup.objects.order_by('-pontos').first()
