@@ -78,24 +78,6 @@ def deletar_startup(request, id):
     startup.delete()
     return redirect('cadastro')
 
-
-# def ranking(request):
-#     torneio_iniciado = Batalha.objects.exists()
-#     torneio_finalizado = not Batalha.objects.filter(concluida=False).exists()
-#
-#     if not torneio_iniciado:
-#         return render(request, 'torneio/ranking.html', {
-#             'ranking_disponivel': False
-#         })
-#
-#     startups = Startup.objects.all().order_by('-pontos')
-#
-#     return render(request, 'torneio/ranking.html', {
-#         'ranking_disponivel': True,
-#         'torneio_finalizado': torneio_finalizado,
-#         'startups': startups
-#     })
-
 def ranking(request):
     torneio_iniciado = Batalha.objects.exists()
     torneio_finalizado = not Batalha.objects.filter(concluida=False).exists()
@@ -183,81 +165,6 @@ def avancar_fase_ou_finalizar():
 
     return redirect('batalhas')
 
-# def administrar_batalha(request, batalha_id):
-#     batalha = get_object_or_404(Batalha, id=batalha_id)
-#     startup1 = batalha.startup_1
-#     startup2 = batalha.startup_2
-#
-#     eventos = {
-#         'pitch': 6,
-#         'bugs': -4,
-#         'tracoes': 3,
-#         'investidor_irritado': -6,
-#         'fake_news': -8
-#     }
-#
-#     contexto = {
-#         'batalha': batalha,
-#         'eventos': eventos,
-#     }
-#
-#     if request.method == 'POST':
-#         evento1 = request.POST.getlist('eventos_startup_1')
-#         evento2 = request.POST.getlist('eventos_startup_2')
-#
-#         def processa_eventos(startup, eventos_lista):
-#             pontos = 0
-#             eventos_ocorridos = []
-#             for ev in eventos_lista:
-#                 pontos += eventos.get(ev, 0)
-#                 eventos_ocorridos.append(ev)
-#                 if ev == 'bugs':
-#                     startup.bugs += 1
-#                 elif ev == 'fake_news':
-#                     startup.fake_news += 1
-#                 elif ev == 'tracoes':
-#                     startup.tracoes += 1
-#                 elif ev == 'investidor_irritado':
-#                     startup.investidores_irritados += 1
-#             return pontos, eventos_ocorridos
-#
-#         pontuacao1, eventos_startup_1 = processa_eventos(startup1, evento1)
-#         pontuacao2, eventos_startup_2 = processa_eventos(startup2, evento2)
-#
-#         startup1.pontos += pontuacao1
-#         startup2.pontos += pontuacao2
-#
-#         empate = pontuacao1 == pontuacao2
-#         shark_fight = False
-#
-#         if empate:
-#             shark_fight = True
-#             bonus = 2
-#             if random.choice([True, False]):
-#                 pontuacao1 += bonus
-#                 startup1.pontos += bonus
-#             else:
-#                 pontuacao2 += bonus
-#                 startup2.pontos += bonus
-#
-#         vencedor = startup1 if pontuacao1 > pontuacao2 else startup2
-#         vencedor.pontos += 30
-#
-#         startup1.save()
-#         startup2.save()
-#
-#         batalha.concluida = True
-#         batalha.vencedor = vencedor
-#         batalha.eventos_startup_1 = eventos_startup_1
-#         batalha.eventos_startup_2 = eventos_startup_2
-#         batalha.shark_fight = shark_fight
-#         batalha.save()
-#
-#         proxima_acao = avancar_fase_ou_finalizar()
-#
-#         return proxima_acao or redirect('batalhas')
-#
-#     return render(request, 'torneio/administrar.html', contexto)
 
 def administrar_batalha(request, batalha_id):
     batalha = get_object_or_404(Batalha, id=batalha_id)
@@ -342,11 +249,6 @@ def administrar_batalha(request, batalha_id):
 def campea(request):
     campea = Startup.objects.order_by('-pontos').first()
     return render(request, 'torneio/campea.html', {'campea': campea})
-
-def historico(request, start_id):
-    startup = Startup.objects.get(id=start_id)
-    batalhas = Batalha.objects.filter(startup_1=startup) | Batalha.objects.filter(startup_2=startup)
-    return render(request, 'torneio/historico.html', {'startup': startup, 'batalhas': batalhas})
 
 def reiniciar_sistema(request):
     Startup.objects.all().delete()

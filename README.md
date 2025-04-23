@@ -34,7 +34,7 @@ O **Startup Rush** é um sistema baseado em torneio para startups, onde diferent
 
 1. **Clonar o repositório**:
    ```bash
-   git clone https://github.com/seu_usuario/startup_rush.git
+   git clone https://github.com/MarianaLuisa/startup.git
    cd startup_rush
    ```
 
@@ -62,6 +62,13 @@ O **Startup Rush** é um sistema baseado em torneio para startups, onde diferent
 
 6. **Acessar o sistema**:
    - Abra o navegador e acesse: `http://127.0.0.1:8000`
+
+
+## 🔗 Deploy
+
+   Sistema online:
+   [Startup Rush no Render](https://startup-rush.onrender.com)
+
 
 ### Como Usar
 
