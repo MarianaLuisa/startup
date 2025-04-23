@@ -64,7 +64,7 @@ O **Startup Rush** é um sistema baseado em torneio para startups, onde diferent
    - Abra o navegador e acesse: `http://127.0.0.1:8000`
 
 
-## 🔗 Deploy
+## Deploy
 
    Sistema online:
    [Startup Rush no Render](https://startup-rush.onrender.com)
